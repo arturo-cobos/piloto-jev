@@ -11,7 +11,7 @@ y los docs en <https://docs.typesafe.ai>.
 
 | Archivo | Qué es |
 |---|---|
-| `explicacion-jev.html` | La explicación *for dummies* en formato Lite Thinking. Ábrela primero. Trae una caja interactiva que corre en el navegador. |
+| `explicacion-jev.html` | La explicación *for dummies* en formato Zentauri. Ábrela primero. Trae una caja interactiva que corre en el navegador. |
 | `piloto.py` | El piloto: triage de 5 tickets de soporte. Un archivo, sin dependencias. |
 
 ## Correr el piloto
