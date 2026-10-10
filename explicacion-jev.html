@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JEV explicado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Identidad Lite Thinking (tipo 1): lienzo claro, amarillo marca, bandas negras.
+     Un solo tema a propósito: la identidad no tiene variante oscura. */
+  :root {
+    color-scheme: light;
+    --yellow: #FFE900;
+    --yellow-mid: #FFF266;
+    --yellow-soft: #FFF9C4;
+    --yellow-pale: #FFFDE7;
+    --grey-bg: #F2F2F2;
+    --grey-line: #D9D9D9;
+    --grey-txt: #666666;
+    --black: #1A1A1A;
+    --white: #FFFFFF;
+    --pink: #FFD8F4;
+    --pink-line: #AF3FB9;
+    --sans: "Segoe UI", "Open Sans", system-ui, -apple-system, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--white); color: var(--black); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+  .stripe { position: fixed; inset: 0 auto 0 0; width: 10px; background: var(--yellow); z-index: 5; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 40px 24px; padding-block: 36px 48px; display: grid; gap: 56px; }
+  @media (max-width: 640px) { .wrap { padding-inline: 26px 16px; gap: 44px; } .stripe { width: 6px; } }
+
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  code { font-family: var(--mono); font-size: .86em; background: var(--grey-bg); padding: 1px 5px; border-radius: 3px; }
+  .hl { background: var(--yellow); padding: 0 .18em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
+  /* ---------- Cabecera ---------- */
+  .head { display: grid; grid-template-columns: 1fr minmax(260px, 360px); gap: 28px; align-items: start; }
+  @media (max-width: 820px) { .head { grid-template-columns: 1fr; } }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--grey-txt); }
+  h1 { font-size: clamp(28px, 4.4vw, 46px); font-weight: 800; line-height: 1.1; text-transform: uppercase; letter-spacing: -.01em; margin-top: 8px; }
+  .sub { font-weight: 300; font-size: clamp(16px, 1.8vw, 19px); color: var(--grey-txt); margin-top: 12px; max-width: 60ch; }
+  .underline { width: 64px; height: 5px; background: var(--yellow); margin-top: 16px; }
+  .synth { background: var(--yellow); padding: 20px 22px; font-weight: 600; font-size: 16px; line-height: 1.45; box-shadow: 0 8px 20px -10px rgba(120,100,0,.55); }
+  .synth small { display: block; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+
+  /* ---------- Sección ---------- */
+  .sec { display: grid; gap: 20px; }
+  .sec-head { display: grid; gap: 6px; }
+  .sec-head h2 { font-size: clamp(20px, 2.4vw, 26px); font-weight: 800; text-transform: uppercase; }
+  .sec-head h2 .y { background: var(--yellow); padding: 0 .2em; }
+  .sec-head p { color: var(--grey-txt); max-width: 70ch; }
+
+  /* ---------- Tarjetas ---------- */
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 820px) { .cards { grid-template-columns: 1fr; } }
+  .card { border: 1px solid var(--grey-line); display: grid; grid-template-rows: auto 1fr; }
+  .card-h { background: linear-gradient(180deg, var(--yellow-mid), var(--yellow)); padding: 12px 16px; font-weight: 800; text-transform: uppercase; font-size: 14px; letter-spacing: .03em; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; box-shadow: 0 4px 10px -6px rgba(120,100,0,.6); }
+  .card-h span { font-family: var(--mono); font-weight: 400; text-transform: none; font-size: 12px; letter-spacing: 0; }
+  .card-b { padding: 14px 16px 16px; display: grid; gap: 8px; align-content: start; }
+  .card-b ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+
+  /* ---------- Pasos ---------- */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  @media (max-width: 900px) { .steps { grid-template-columns: 1fr; gap: 8px; } }
+  .step { position: relative; padding: 14px 30px 14px 18px; background: var(--grey-bg); clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%); display: grid; gap: 4px; }
+  .step:first-child { clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%); }
+  .step:not(:first-child) { padding-left: 34px; }
+  @media (max-width: 900px) { .step, .step:first-child { clip-path: none; padding: 12px 16px; } .step:not(:first-child) { padding-left: 16px; } }
+  .step .n { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--grey-txt); }
+  .step strong { font-size: 15px; }
+  .step p { font-size: 13.5px; }
+  .step.on { background: var(--yellow); }
+  .step.on .n { color: var(--black); }
+
+  /* ---------- Explorador de tipos ---------- */
+  .explorer { display: grid; grid-template-columns: 250px 1fr; border: 1px solid var(--grey-line); }
+  @media (max-width: 880px) { .explorer { grid-template-columns: 1fr; } }
+  .tabs { background: var(--grey-bg); padding: 14px 10px; display: grid; gap: 2px; align-content: start; }
+  .tabs .root { font-family: var(--mono); font-weight: 600; font-size: 13px; padding: 4px 8px 10px; }
+  .tabs button { all: unset; cursor: pointer; display: grid; gap: 2px; padding: 9px 10px; border-left: 3px solid transparent; }
+  .tabs button:hover { background: var(--yellow-pale); }
+  .tabs button:focus-visible { outline: 2px solid var(--black); outline-offset: -2px; }
+  .tabs button[aria-selected="true"] { background: var(--white); border-left-color: var(--yellow); }
+  .tabs b { font-family: var(--mono); font-size: 13.5px; }
+  .tabs i { font-style: normal; font-size: 12px; color: var(--grey-txt); }
+  .viewer { display: grid; grid-template-rows: auto auto 1fr; min-width: 0; }
+  .note { padding: 11px 16px; background: var(--yellow-pale); border-bottom: 1px solid var(--grey-line); font-size: 13.5px; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 22px; padding: 11px 16px; border-bottom: 1px solid var(--grey-line); font-size: 13px; }
+  .meta b { font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--grey-txt); display: block; font-weight: 700; }
+  .meta span { font-family: var(--mono); }
+  .panes { display: grid; grid-template-columns: 1fr 1fr; min-width: 0; }
+  @media (max-width: 880px) { .panes { grid-template-columns: 1fr; } }
+  .pane { min-width: 0; display: grid; grid-template-rows: auto 1fr; }
+  .pane + .pane { border-left: 1px solid var(--grey-line); }
+  @media (max-width: 880px) { .pane + .pane { border-left: none; border-top: 1px solid var(--grey-line); } }
+  .pane-h { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--grey-txt); padding: 9px 16px 4px; }
+  pre { margin: 0; overflow: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; padding: 4px 16px 14px; }
+  .k { font-weight: 600; }
+  .s { color: var(--pink-line); }
+  .num { color: #0A6E4A; }
+  .fence { color: var(--grey-txt); }
+
+  /* ---------- Diagrama ---------- */
+  .diagram { border: 1px solid var(--grey-line); overflow-x: auto; background: var(--white); }
+  .diagram svg { display: block; min-width: 820px; width: 100%; height: auto; }
+
+  /* ---------- Anatomía ---------- */
+  .anat { display: grid; grid-template-columns: 1.05fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 900px) { .anat { grid-template-columns: 1fr; } }
+  .anat pre { border: 1px solid var(--grey-line); padding: 14px 16px; }
+  .fields { display: grid; gap: 10px; }
+  .field { display: grid; grid-template-columns: 132px 1fr; gap: 12px; padding: 10px 12px; border-left: 4px solid var(--yellow); background: var(--yellow-pale); font-size: 14px; }
+  .field.body { border-left-color: var(--black); background: var(--grey-bg); }
+  .field code { background: transparent; padding: 0; font-weight: 600; font-size: 13px; }
+  @media (max-width: 480px) { .field { grid-template-columns: 1fr; gap: 2px; } }
+
+  /* ---------- Caja interactiva ---------- */
+  .play { border: 1px solid var(--grey-line); display: grid; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 880px) { .play { grid-template-columns: 1fr; } }
+  .play-in { padding: 16px; display: grid; gap: 12px; align-content: start; border-right: 1px solid var(--grey-line); }
+  @media (max-width: 880px) { .play-in { border-right: none; border-bottom: 1px solid var(--grey-line); } }
+  .play-in label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--grey-txt); }
+  textarea { font-family: var(--sans); font-size: 14px; border: 1px solid var(--grey-line); padding: 10px 12px; resize: vertical; min-height: 86px; width: 100%; }
+  textarea:focus-visible { outline: 2px solid var(--yellow); outline-offset: -1px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips button { all: unset; cursor: pointer; font-size: 12px; padding: 4px 10px; background: var(--grey-bg); border: 1px solid var(--grey-line); }
+  .chips button:hover { background: var(--yellow-pale); }
+  .chips button:focus-visible { outline: 2px solid var(--black); outline-offset: 1px; }
+  .go { all: unset; cursor: pointer; background: var(--black); color: var(--yellow); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 13px; padding: 12px 18px; text-align: center; }
+  .go:hover { background: #000; }
+  .go:focus-visible { outline: 2px solid var(--yellow); outline-offset: 2px; }
+  .play-out { padding: 16px; display: grid; gap: 14px; align-content: start; }
+  .ans { display: grid; gap: 6px; }
+  .ans-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 13px; }
+  .ans-h b { font-family: var(--mono); font-size: 13px; }
+  .ans-h em { font-style: normal; font-weight: 700; }
+  .bars { display: grid; gap: 3px; }
+  .bar { display: grid; grid-template-columns: 108px 1fr 42px; gap: 8px; align-items: center; font-size: 12px; }
+  .bar > span:first-child { font-family: var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar i { display: block; height: 11px; background: var(--grey-bg); }
+  .bar i > b { display: block; height: 100%; background: var(--yellow); }
+  .bar.win i > b { background: var(--black); }
+  .bar em { font-family: var(--mono); font-style: normal; text-align: right; color: var(--grey-txt); }
+  .verdict { background: var(--black); color: var(--white); padding: 12px 14px; font-size: 14px; }
+  .verdict b { color: var(--yellow); display: block; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
+
+  /* ---------- Bandas ---------- */
+  .band-black { background: var(--black); color: var(--white); padding: 20px 24px; display: grid; gap: 10px; }
+  .band-black h3 { color: var(--yellow); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+  .band-black ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .band-black code { background: #333; color: var(--yellow); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+  .band-grey { background: var(--grey-bg); padding: 18px 22px; display: grid; gap: 8px; }
+  .band-grey h3 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+  .band-grey ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .tbl th { text-align: left; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--grey-txt); padding: 8px 10px; border-bottom: 2px solid var(--black); white-space: nowrap; }
+  .tbl td { padding: 9px 10px; border-bottom: 1px solid var(--grey-line); vertical-align: top; }
+  .tbl tr.flag td { background: var(--yellow-pale); }
+  .tbl .mono { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+  .tbl .q { color: var(--grey-txt); }
+  .wrapt { border: 1px solid var(--grey-line); overflow-x: auto; }
+  .wrapt .tbl { min-width: 680px; }
+  .formula { font-family: var(--mono); font-size: 14px; background: var(--white); padding: 12px 14px; border-left: 4px solid var(--yellow); }
+
+  /* ---------- Pie ---------- */
+  .foot { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .pill { flex: 1 1 520px; background: var(--black); color: var(--white); border-radius: 999px; padding: 14px 28px; font-weight: 700; font-size: 16px; line-height: 1.4; }
+  .pill em { color: var(--yellow); font-style: normal; }
+  .logo { height: 38px; width: auto; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tabs button, .bar i > b { transition: background-color .15s, width .25s; }
+  }
+</style>
+
+<div class="stripe" aria-hidden="true"></div>
+<main class="wrap">
+
+  <!-- Cabecera -->
+  <header class="head">
+    <div>
+      <div class="eyebrow">Piloto · Jev 1.13 · probado contra la API real</div>
+      <h1>JEV explicado <span class="hl">for dummies</span></h1>
+      <p class="sub">Un modelo que no escribe texto. Le haces preguntas cerradas y te devuelve la respuesta ya tipada: una opción, una nota o un sí/no, cada una con su probabilidad.</p>
+      <div class="underline"></div>
+    </div>
+    <aside class="synth">
+      <small>La idea</small>
+      Un LLM normal te devuelve un párrafo y tú tienes que adivinar qué quiso decir. Jev te devuelve <code style="background:rgba(0,0,0,.08)">"facturacion"</code> con una confianza de 1.00. Jev opina; <b>tu código decide y ejecuta</b>.
+    </aside>
+  </header>
+
+  <!-- Qué es -->
+  <section class="sec" aria-labelledby="s-que">
+    <div class="sec-head">
+      <h2 id="s-que">Qué es <span class="y">Jev</span></h2>
+      <p>TypeSafe lo llama un modelo «System One»: la decisión rápida y refleja, no el razonamiento largo. Sirve para el momento en que un flujo necesita elegir por dónde seguir, y lo necesita rápido, barato y predecible.</p>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <div class="card-h">System One <span>vs. System Two</span></div>
+        <div class="card-b">
+          <p>Un LLM de chat razona y redacta: es System Two. Lento y caro para una decisión de una línea.</p>
+          <ul>
+            <li>Jev no redacta: <b>juzga</b>.</li>
+            <li>Lo usas donde antes pusiste un <code>if</code> imposible de escribir.</li>
+          </ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-h">Salida tipada <span>choice · score · noul</span></div>
+        <div class="card-b">
+          <p>No hay JSON que parsear a la suerte ni texto que limpiar. El contrato lo defines tú en la pregunta.</p>
+          <ul>
+            <li>Cada respuesta trae <b>probabilidades</b>.</li>
+            <li>Si duda, lo sabes y puedes frenar.</li>
+          </ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-h">Ejecuta el host <span>no el modelo</span></div>
+        <div class="card-b">
+          <p>Jev nunca llama a tus APIs ni toca tu base de datos. Devuelve un dato y se calla.</p>
+          <ul>
+            <li>Los permisos siguen siendo tuyos.</li>
+            <li>La acción sale de reglas que puedes leer y auditar.</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Cómo funciona -->
+  <section class="sec" aria-labelledby="s-flujo">
+    <div class="sec-head">
+      <h2 id="s-flujo">Cómo <span class="y">funciona</span></h2>
+      <p>Cuatro pasos. Los dos primeros son tuyos, el tercero es del modelo, el cuarto vuelve a ser tuyo.</p>
+    </div>
+    <div class="steps">
+      <div class="step on">
+        <div class="n">Paso 1 · tú</div>
+        <strong>Describes el estado</strong>
+        <p>El texto, el objeto o la lista que hay que juzgar. Va en <code>state</code>.</p>
+      </div>
+      <div class="step on">
+        <div class="n">Paso 2 · tú</div>
+        <strong>Defines las preguntas</strong>
+        <p>Una o varias, con nombre. Cada una elige su tipo y sus criterios.</p>
+      </div>
+      <div class="step">
+        <div class="n">Paso 3 · Jev</div>
+        <strong>Responde tipado</strong>
+        <p>Una respuesta por pregunta, con probabilidades. Milisegundos, no segundos.</p>
+      </div>
+      <div class="step">
+        <div class="n">Paso 4 · tú</div>
+        <strong>Decides y ejecutas</strong>
+        <p>Reglas normales sobre datos limpios. Aquí ya no hay IA.</p>
+      </div>
+    </div>
+    <div class="diagram">
+      <svg viewBox="0 0 900 230" role="img" aria-label="Flujo: el estado y las preguntas entran a Jev, que devuelve respuestas tipadas; tu código aplica reglas y ejecuta la acción.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#1A1A1A"/>
+          </marker>
+        </defs>
+        <g font-family="Segoe UI, Open Sans, sans-serif" font-size="13">
+          <rect x="14" y="34" width="176" height="52" fill="#F2F2F2" stroke="#D9D9D9"/>
+          <text x="28" y="56" font-weight="700" font-size="12" letter-spacing="1.4">STATE</text>
+          <text x="28" y="74" fill="#666">el ticket, el documento…</text>
+
+          <rect x="14" y="118" width="176" height="52" fill="#F2F2F2" stroke="#D9D9D9"/>
+          <text x="28" y="140" font-weight="700" font-size="12" letter-spacing="1.4">QUESTIONS</text>
+          <text x="28" y="158" fill="#666">choice · score · noul</text>
+
+          <path d="M190,60 C230,60 230,102 262,102" fill="none" stroke="#1A1A1A" stroke-width="1.6" marker-end="url(#ar)"/>
+          <path d="M190,144 C230,144 230,102 262,102" fill="none" stroke="#1A1A1A" stroke-width="1.6" marker-end="url(#ar)"/>
+
+          <rect x="268" y="62" width="152" height="80" fill="#FFE900" stroke="#1A1A1A" stroke-width="2"/>
+          <text x="344" y="96" text-anchor="middle" font-weight="800" font-size="19" letter-spacing="1">JEV</text>
+          <text x="344" y="118" text-anchor="middle" font-size="11.5">aporta el juicio</text>
+          <text x="344" y="170" text-anchor="middle" font-size="11" fill="#666">no ejecuta nada</text>
+
+          <path d="M420,102 L492,102" fill="none" stroke="#1A1A1A" stroke-width="1.6" marker-end="url(#ar)"/>
+
+          <rect x="498" y="48" width="178" height="108" fill="#FFFDE7" stroke="#D9D9D9"/>
+          <text x="512" y="70" font-weight="700" font-size="12" letter-spacing="1.4">ANSWERS</text>
+          <text x="512" y="92" font-family="JetBrains Mono, monospace" font-size="11.5">equipo: "facturacion"</text>
+          <text x="512" y="110" font-family="JetBrains Mono, monospace" font-size="11.5">urgencia: 1.43</text>
+          <text x="512" y="128" font-family="JetBrains Mono, monospace" font-size="11.5">reembolso: 0.95</text>
+          <text x="512" y="148" font-size="11" fill="#666">+ probabilities · confidence</text>
+
+          <path d="M676,102 L738,102" fill="none" stroke="#1A1A1A" stroke-width="1.6" marker-end="url(#ar)"/>
+
+          <rect x="744" y="62" width="142" height="80" fill="#1A1A1A"/>
+          <text x="815" y="92" text-anchor="middle" fill="#FFE900" font-weight="800" font-size="14" letter-spacing="1">TU CÓDIGO</text>
+          <text x="815" y="112" text-anchor="middle" fill="#FFF" font-size="11.5">reglas + permisos</text>
+          <text x="815" y="128" text-anchor="middle" fill="#FFF" font-size="11.5">ejecuta la acción</text>
+
+          <line x1="708" y1="24" x2="708" y2="206" stroke="#D9D9D9" stroke-dasharray="5 4"/>
+          <text x="716" y="24" font-size="10.5" font-weight="700" letter-spacing="1.2" fill="#666">AQUÍ YA NO HAY IA</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- Los tres tipos -->
+  <section class="sec" aria-labelledby="s-tipos">
+    <div class="sec-head">
+      <h2 id="s-tipos">Los tres <span class="y">tipos de pregunta</span></h2>
+      <p>Es todo el vocabulario que hay que aprender. Puedes mezclar los tres en una sola llamada y pagas un solo viaje.</p>
+    </div>
+    <div class="explorer">
+      <div class="tabs" id="tabs" role="tablist" aria-orientation="vertical">
+        <div class="root">questions</div>
+      </div>
+      <div class="viewer">
+        <div class="note" id="note"></div>
+        <div class="meta" id="meta"></div>
+        <div class="panes">
+          <div class="pane">
+            <div class="pane-h">Lo que mandas</div>
+            <pre id="req"></pre>
+          </div>
+          <div class="pane">
+            <div class="pane-h">Lo que vuelve</div>
+            <pre id="res"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Confianza -->
+  <section class="sec" aria-labelledby="s-conf">
+    <div class="sec-head">
+      <h2 id="s-conf">La confianza es <span class="y">el segundo eje</span></h2>
+      <p>La respuesta te dice <b>qué</b>. La confianza te dice <b>si actuar</b>. Son dos campos distintos, y el segundo es el que te salva.</p>
+    </div>
+    <div class="two">
+      <div class="band-grey">
+        <h3>Confianza ≠ probabilidad</h3>
+        <p>El error de principiante es usar la probabilidad más alta como medida de seguridad. Jev trae un campo <code>confidence</code> propio, que mide cuánto sobresale la mejor opción <b>por encima de un volado</b>:</p>
+        <p class="formula">confidence = (p_max − 1/n) / (1 − 1/n)</p>
+        <p>Ejemplo real del piloto. El ticket mixto —habla de un cargo <i>y</i> de un fallo técnico— devuelve <code>tecnico</code> con probabilidad 0.62. Suena bien, pero <code>facturacion</code> se quedó en 0.35: la confianza es <b>0.49</b>, casi un volado entre dos equipos. Usar el 0.62 como «62% de seguridad» te lo enruta mal; leer la confianza lo manda a un humano.</p>
+      </div>
+      <div class="band-black">
+        <h3>Tres tramos, no un umbral</h3>
+        <ul>
+          <li><b>&lt; 0.60</b> — nadie actúa solo. Va a una persona.</li>
+          <li><b>0.60 – 0.85</b> — actúa si equivocarse es barato; pide confirmación si no.</li>
+          <li><b>&gt; 0.85</b> — ejecuta, incluso lo que mueve dinero.</li>
+        </ul>
+        <p style="font-size:13.5px">Un umbral único para todas las acciones es un anti-patrón explícito en los docs. Enrutar un ticket y aprobar un reembolso no pueden exigir lo mismo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Caja interactiva -->
+  <section class="sec" aria-labelledby="s-play">
+    <div class="sec-head">
+      <h2 id="s-play">Pruébalo <span class="y">aquí mismo</span></h2>
+      <p>Esta caja no llama a la API: imita al simulador del piloto con unas reglas de juguete, para que veas la <b>forma</b> del dato y cómo se convierte en una acción. El piloto en Python hace lo mismo contra el modelo real.</p>
+    </div>
+    <div class="play">
+      <div class="play-in">
+        <label for="ticket">El estado · un ticket de soporte</label>
+        <textarea id="ticket">Me cobraron dos veces el plan de septiembre. Devuélvanme uno, por favor.</textarea>
+        <div class="chips">
+          <button type="button" data-t="La integración con el ERP tira error 500 desde ayer y estamos perdiendo pedidos.">caso técnico urgente</button>
+          <button type="button" data-t="Buenas, ¿cuánto cuesta el plan para 50 usuarios?">pregunta de ventas</button>
+          <button type="button" data-t="Hola, quería saludar y felicitarlos por el producto.">caso ambiguo</button>
+        </div>
+        <button type="button" class="go" id="go">Preguntar a Jev</button>
+      </div>
+      <div class="play-out" id="out"></div>
+    </div>
+  </section>
+
+  <!-- Anatomía -->
+  <section class="sec" aria-labelledby="s-anat">
+    <div class="sec-head">
+      <h2 id="s-anat">Anatomía de <span class="y">la llamada</span></h2>
+      <p>Un <code>POST</code> con tres campos. Sin SDK si no quieres: el piloto usa la librería estándar de Python.</p>
+    </div>
+    <div class="anat">
+      <pre>POST https://api.typesafe.ai/v1/systemone
+Authorization: Bearer $TYPESAFE_API_KEY
+Content-Type: application/json
+
+{
+  <span class="k s">"model"</span>: <span class="s">"jev-1.13.0"</span>,
+  <span class="k s">"state"</span>: { <span class="s">"ticket"</span>: <span class="s">"Me cobraron dos veces…"</span> },
+  <span class="k s">"questions"</span>: {
+    <span class="s">"equipo"</span>: {
+      <span class="s">"type"</span>: <span class="s">"choice"</span>,
+      <span class="s">"instructions"</span>: <span class="s">"¿Qué equipo atiende?"</span>,
+      <span class="s">"criteria"</span>: {
+        <span class="s">"facturacion"</span>: <span class="s">"Cobros, pagos, reembolsos"</span>,
+        <span class="s">"tecnico"</span>: <span class="s">"Errores, caídas"</span>
+      }
+    }
+  }
+}</pre>
+      <div class="fields">
+        <div class="field"><code>model</code><span>Fija la versión: <code>jev-1.13.0</code>, no <code>jev-latest</code>. Así el comportamiento no cambia bajo tus pies.</span></div>
+        <div class="field"><code>state</code><span>Lo que hay que juzgar. Texto, objeto o lista. Filtra lo que no sirve: la precisión cae cuando el estado se llena de ruido.</span></div>
+        <div class="field"><code>questions</code><span>El contrato. Cada clave es el nombre con el que volverá la respuesta.</span></div>
+        <div class="field"><code>type</code><span><code>choice</code>, <code>score</code> o <code>noul</code>. Decide la forma de la respuesta.</span></div>
+        <div class="field"><code>instructions</code><span>La pregunta en una línea, como se la harías a un compañero nuevo. Directa: los dobles negativos le cuestan.</span></div>
+        <div class="field"><code>criteria</code><span>Las opciones, con sus condiciones explícitas. Jev lee literal, así que describe los casos borde aquí.</span></div>
+        <div class="field body"><code>confidence</code><span>Campo propio de <code>choice</code> y <code>score</code>. <b>No es la probabilidad más alta</b>: mide cuánto sobresale la mejor opción sobre un volado.</span></div>
+        <div class="field body"><code>answers</code><span>Lo que vuelve: una entrada por pregunta, con su valor, sus probabilidades y su confianza. Más <code>usage</code> con los tokens.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Jaggedness -->
+  <section class="sec" aria-labelledby="s-jag">
+    <div class="sec-head">
+      <h2 id="s-jag">Lo que <span class="y">hace mal</span></h2>
+      <p>TypeSafe publica las limitaciones conocidas de cada versión — le llaman <i>model jaggedness</i>. Las seis de <code>jev-1.13</code> que más te van a morder, con su remedio.</p>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <div class="card-h">Lee literal <span>1</span></div>
+        <div class="card-b">
+          <p>Responde la pregunta que escribiste, no la que querías.</p>
+          <ul><li>Escribe las condiciones exactas en <code>criteria</code>, incluidos los casos borde.</li></ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-h">No cuenta <span>2</span></div>
+        <div class="card-b">
+          <p>Los números y la aritmética no son lo suyo.</p>
+          <ul><li>Haz las cuentas en código. Pásale nombres, no cifras.</li></ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-h">Las fechas son texto <span>3</span></div>
+        <div class="card-b">
+          <p>No las ordena ni las compara como cantidades.</p>
+          <ul><li>Extrae las partes con <code>choice</code> y ordena tú.</li></ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-h">Sesgo de orden <span>4</span></div>
+        <div class="card-b">
+          <p>Se inclina hacia la opción que va primero en la lista.</p>
+          <ul><li>Cambia el orden y verifica que la respuesta no se mueva.</li></ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-h">Se distrae <span>5</span></div>
+        <div class="card-b">
+          <p>La precisión cae cuando el <code>state</code> crece con cosas que no importan.</p>
+          <ul><li>Filtra los campos relevantes antes de preguntar.</li></ul>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-h">No desconfía <span>6</span></div>
+        <div class="card-b">
+          <p>No trata el <code>state</code> como hostil: le entran instrucciones inyectadas.</p>
+          <ul><li>Criterios explícitos, y pruébalo con contenido malicioso antes de producción.</li></ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- Cuándo sí / cuándo no -->
+  <section class="sec" aria-labelledby="s-cuando">
+    <div class="sec-head">
+      <h2 id="s-cuando">Cuándo <span class="y">sí y cuándo no</span></h2>
+      <p>La regla corta: si la respuesta cabe en un menú, es Jev. Si hay que redactar, es un LLM normal.</p>
+    </div>
+    <div class="two">
+      <div class="band-black">
+        <h3>Para esto sí</h3>
+        <ul>
+          <li>Clasificar y enrutar: tickets, correos, leads.</li>
+          <li>Moderar o filtrar contenido antes de procesarlo.</li>
+          <li>Elegir el siguiente paso de un agente entre opciones conocidas.</li>
+          <li>Ordenar resultados de búsqueda por relevancia.</li>
+          <li>Mapear campos entre dos esquemas (el caso típico de integración).</li>
+          <li>Verificar lo que escribió un LLM grande, antes de mostrarlo.</li>
+        </ul>
+      </div>
+      <div class="band-grey">
+        <h3>Para esto no</h3>
+        <ul>
+          <li>Redactar la respuesta al cliente — eso es texto libre.</li>
+          <li>Resumir o explicar algo largo.</li>
+          <li>Escribir código.</li>
+          <li>Contar, sumar o comparar fechas.</li>
+          <li>Cualquier cosa donde no puedas enumerar las salidas de antemano.</li>
+        </ul>
+        <p style="font-size:13.5px;color:var(--grey-txt)">Lo normal es combinarlos: Jev decide a dónde va, y después un modelo grande redacta.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- El piloto -->
+  <section class="sec" aria-labelledby="s-piloto">
+    <div class="sec-head">
+      <h2 id="s-piloto">El <span class="y">piloto</span></h2>
+      <p>Un archivo, sin dependencias. Corre simulado sin API key, y contra el modelo real en cuanto le pongas una.</p>
+    </div>
+    <div class="anat">
+      <pre>$ cd ~/Work/piloto-jev
+$ <span class="k">python3 piloto.py</span>
+
+Piloto JEV · triage de tickets · modo: API real
+
+<span class="k">1.</span> Me cobraron dos veces el plan de septiembre…
+   equipo         = facturacion  confianza 1.00
+   urgencia       = 1.43  (Normal, dentro del día)
+   pide_reembolso = 0.95  (probabilidad)
+   → acción: cola de reembolsos — automático
+
+<span class="k">6.</span> …duda sobre el cargo del mes pasado y también
+    no me carga el panel.
+   equipo         = tecnico      confianza 0.48
+   urgencia       = 1.84  (Urgente, en horas)
+   pide_reembolso = 0.04  (probabilidad)
+   → acción: <span class="k">revisión humana (confianza 0.48 &lt; 0.6)</span>
+
+<span class="fence"># sin API key cae al simulador, avisando</span></pre>
+      <div class="fields">
+        <div class="field"><code>PREGUNTAS</code><span>El diccionario de arriba del archivo. Las tres preguntas, una de cada tipo, en una sola llamada. Cámbialas y tienes otro caso de uso.</span></div>
+        <div class="field"><code>preguntar_a_jev()</code><span>El <code>POST</code>. Si no hay API key, cae al simulador sin romperse.</span></div>
+        <div class="field"><code>decidir()</code><span>Las reglas del host. Aquí viven los tramos de confianza y la decisión de escalar a una persona.</span></div>
+        <div class="field body"><code>ESCALAR · RIESGO_ALTO</code><span><b>Las líneas más importantes del piloto.</b> Dos umbrales, no uno: debajo de 0.60 lo ve un humano; mover dinero exige 0.85. Enrutar un ticket y aprobar un reembolso no pueden pedir lo mismo.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resultados reales -->
+  <section class="sec" aria-labelledby="s-real">
+    <div class="sec-head">
+      <h2 id="s-real">Lo que <span class="y">devolvió de verdad</span></h2>
+      <p>Seis tickets contra <code>jev-1.13.0</code>. Las tres preguntas en una sola llamada por ticket.</p>
+    </div>
+    <div class="wrapt">
+      <table class="tbl">
+        <thead>
+          <tr><th>#</th><th>Ticket</th><th>Equipo</th><th>Conf.</th><th>Urgencia</th><th>Acción del host</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="mono">1</td><td class="q">Cobro duplicado, pide devolución</td><td class="mono">facturacion</td><td class="mono">1.00</td><td class="mono">1.43</td><td>reembolsos — automático</td></tr>
+          <tr><td class="mono">2</td><td class="q">ERP tira 500, perdiendo pedidos</td><td class="mono">tecnico</td><td class="mono">1.00</td><td class="mono">2.79</td><td>atención inmediata</td></tr>
+          <tr><td class="mono">3</td><td class="q">¿Cuánto cuesta el plan?</td><td class="mono">ventas</td><td class="mono">1.00</td><td class="mono">0.99</td><td>cola normal</td></tr>
+          <tr><td class="mono">4</td><td class="q">Saludo y felicitación</td><td class="mono">otro</td><td class="mono">1.00</td><td class="mono">0.14</td><td>cola normal</td></tr>
+          <tr><td class="mono">5</td><td class="q">Dashboard lentísimo, urgente</td><td class="mono">tecnico</td><td class="mono">1.00</td><td class="mono">2.97</td><td>atención inmediata</td></tr>
+          <tr class="flag"><td class="mono">6</td><td class="q">Cargo del mes <b>y</b> panel no carga</td><td class="mono">tecnico</td><td class="mono"><b>0.48</b></td><td class="mono">1.84</td><td><b>revisión humana</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="two">
+      <div class="band-grey">
+        <h3>Por qué el ticket 6 es el importante</h3>
+        <p>Los cinco primeros son fáciles y la confianza colapsa a <b>1.00</b>: las probabilidades salen degeneradas, <code>{otro: 1.0, resto: 0.0}</code>. Con solo esos cinco, el tramo de revisión humana <b>nunca se dispara</b> y el piloto no demuestra su función más importante.</p>
+        <p>El 6 es mixto a propósito. Devuelve <code>tecnico</code> con 0.62 — suena bien — pero <code>facturacion</code> se quedó en 0.35. La confianza es 0.48: un volado entre dos equipos. Leer el 0.62 como «62% de seguridad» lo enruta mal con cara de certeza.</p>
+      </div>
+      <div class="band-black">
+        <h3>Lo que costó</h3>
+        <ul>
+          <li><b>~530</b> tokens de entrada por ticket.</li>
+          <li><b>~88</b> tokens de salida.</li>
+          <li><b>3 preguntas, 1 llamada.</b> Son independientes, así que viajan juntas.</li>
+        </ul>
+        <p style="font-size:13.5px">Los campos que vuelven, confirmados contra la API: <code>confidence</code> es propio de <code>choice</code> y <code>score</code>; <code>noul</code> es un número; <code>legend</code> trae los cuatro niveles; y las probabilidades de un <code>score</code> van indexadas por posición, no por nombre.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Siguiente paso -->
+  <section class="sec" aria-labelledby="s-next">
+    <div class="sec-head">
+      <h2 id="s-next">Siguiente <span class="y">paso</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step on">
+        <div class="n">Hecho</div>
+        <strong>El piloto corre</strong>
+        <p>Contra <code>jev-1.13.0</code>, con los seis tickets de arriba.</p>
+      </div>
+      <div class="step on">
+        <div class="n">Una tarde</div>
+        <strong>Cambia las preguntas</strong>
+        <p>Pon un caso tuyo real. El resto del archivo no se toca.</p>
+      </div>
+      <div class="step">
+        <div class="n">Antes de confiar</div>
+        <strong>Etiqueta 50 casos</strong>
+        <p>A mano. Es la única forma de saber si acierta: ya no hay métricas de entrenamiento.</p>
+      </div>
+      <div class="step">
+        <div class="n">Para producción</div>
+        <strong>Ajusta los tramos con costos</strong>
+        <p>Qué cuesta un falso positivo contra un falso negativo. No a dedo, como están hoy.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pie -->
+  <footer class="foot">
+    <p class="pill">Jev no escribe: <em>elige</em>. Tú defines <em>el menú</em>, él te dice <em>cuál y con qué confianza</em>, y tu código hace el resto.</p>
+    <img class="logo" src="data:image/png;base64,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" alt="LT Tech">
+  </footer>
+
+</main>
+
+<script>
+/* ---------- Datos de los tres tipos ---------- */
+const TIPOS = {
+  choice: {
+    titulo: "choice",
+    sub: "elige una opción",
+    nota: "<b>Clasificar.</b> Le das un menú cerrado y elige exactamente una. Hasta 255 opciones.",
+    meta: [["devuelve", "choice + probabilities + confidence"], ["criteria", "objeto { nombre: condición }"], ["máximo", "255 opciones"]],
+    req: `"equipo": {
+  "type": "choice",
+  "instructions": "¿Qué equipo debe atender\\n                  este ticket?",
+  "criteria": {
+    "facturacion": "Cobros, pagos, reembolsos",
+    "tecnico":     "Errores, caídas, lentitud",
+    "ventas":      "Precios, planes",
+    "otro":        "Saludos, o nada de lo anterior"
+  }
+}`,
+    res: `"equipo": {
+  "type": "choice",
+  "choice": "facturacion",
+  "probabilities": {
+    "facturacion": 0.91,
+    "tecnico":     0.04,
+    "ventas":      0.03,
+    "otro":        0.02
+  },
+  "confidence": 0.88
+}`
+  },
+  score: {
+    titulo: "score",
+    sub: "califica en escala",
+    nota: "<b>Medir.</b> Una escala ordenada de menos a más. Entre 2 y 10 niveles. Las probabilidades vuelven indexadas por <b>posición</b>, y <code>legend</code> te da el nombre de cada una.",
+    meta: [["devuelve", "score + legend + confidence"], ["criteria", "lista ordenada"], ["niveles", "entre 2 y 10"]],
+    req: `"urgencia": {
+  "type": "score",
+  "instructions": "¿Qué tan urgente es responder?",
+  "criteria": [
+    "Puede esperar días",
+    "Normal, dentro del día",
+    "Urgente, en horas",
+    "Crítico, el cliente está bloqueado"
+  ]
+}`,
+    res: `"urgencia": {
+  "type": "score",
+  "score": 1.84,
+  "confidence": 0.56,
+  "probabilities": {
+    "0": 0.00,
+    "1": 0.30,
+    "2": 0.56,
+    "3": 0.14
+  },
+  "legend": {
+    "0": "Puede esperar días",
+    "1": "Normal, dentro del día",
+    "2": "Urgente, en horas",
+    "3": "Crítico, está bloqueado"
+  }
+}`
+  },
+  noul: {
+    titulo: "noul",
+    sub: "sí o no",
+    nota: "<b>Decidir.</b> El nombre viene de «no» + «oui». <b>No devuelve un booleano</b>: devuelve la probabilidad del sí, entre 0 y 1. El corte lo pones tú.",
+    meta: [["devuelve", "noul — un número"], ["criteria", "opcional: true / false"], ["rango", "0 = no · 1 = sí"]],
+    req: `"pide_reembolso": {
+  "type": "noul",
+  "instructions": "¿El cliente pide explícitamente\\n                  que le devuelvan dinero?",
+  "criteria": {
+    "true":  "Pide reembolso o reversar un cobro",
+    "false": "No menciona devolución"
+  }
+}`,
+    res: `"pide_reembolso": {
+  "type": "noul",
+  "noul": 0.93
+}`
+  }
+};
+
+const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+/* Resalta claves y valores de un fragmento JSON. */
+function pinta(txt) {
+  return esc(txt)
+    .replace(/"([^"]+)":/g, '<span class="k s">"$1"</span>:')
+    .replace(/: ("(?:[^"\\]|\\.)*")/g, ': <span class="s">$1</span>')
+    .replace(/: (\d+\.?\d*|true|false)/g, ': <span class="num">$1</span>');
+}
+
+const tabs = document.getElementById("tabs");
+tabs.insertAdjacentHTML("beforeend", Object.keys(TIPOS).map(k =>
+  `<button type="button" role="tab" data-k="${k}" aria-selected="false">
+     <b>${TIPOS[k].titulo}</b><i>${TIPOS[k].sub}</i>
+   </button>`).join(""));
+
+function verTipo(k) {
+  const t = TIPOS[k];
+  tabs.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.k === k)));
+  document.getElementById("note").innerHTML = t.nota;
+  document.getElementById("meta").innerHTML = t.meta.map(([a, b]) => `<div><b>${a}</b><span>${esc(b)}</span></div>`).join("");
+  document.getElementById("req").innerHTML = pinta(t.req);
+  document.getElementById("res").innerHTML = pinta(t.res);
+}
+
+tabs.addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (b) verTipo(b.dataset.k);
+});
+tabs.addEventListener("keydown", e => {
+  if (!["ArrowDown", "ArrowUp"].includes(e.key)) return;
+  const bs = [...tabs.querySelectorAll("button")], i = bs.indexOf(document.activeElement);
+  if (i < 0) return;
+  e.preventDefault();
+  const n = bs[(i + (e.key === "ArrowDown" ? 1 : bs.length - 1)) % bs.length];
+  n.focus(); verTipo(n.dataset.k);
+});
+verTipo("choice");
+
+/* ---------- Caja interactiva: mismas reglas de juguete que piloto.py ---------- */
+const NIVELES = ["Puede esperar", "Normal", "Urgente", "Crítico"];
+const ESCALAR = 0.60, RIESGO_ALTO = 0.85, ES_REEMBOLSO = 0.80;
+
+/* La fórmula de los docs: cuánto sobresale la mejor opción sobre un volado. */
+const confianza = ps => {
+  const n = Object.keys(ps).length;
+  return (Math.max(...Object.values(ps)) - 1 / n) / (1 - 1 / n);
+};
+
+function simular(texto) {
+  const t = texto.toLowerCase();
+  const tiene = (...ps) => ps.some(p => t.includes(p));
+  let probs;
+  if (tiene("cobr", "factur", "pag", "devu", "reembols"))
+    probs = { facturacion: .91, tecnico: .04, ventas: .03, otro: .02 };
+  else if (tiene("error", "falla", "no funciona", "caíd", "lent", "500"))
+    probs = { tecnico: .89, facturacion: .05, ventas: .04, otro: .02 };
+  else if (tiene("precio", "plan", "cotiz", "contratar"))
+    probs = { ventas: .88, facturacion: .06, tecnico: .03, otro: .03 };
+  else
+    probs = { otro: .41, tecnico: .27, facturacion: .19, ventas: .13 };
+
+  const alto = tiene("urgente", "ya", "inmediat", "perdiendo", "caíd", "bloquead");
+  // La API indexa por posición y manda `legend` con los nombres.
+  const pUrg = alto ? { 0: 0, 1: .07, 2: .56, 3: .37 } : { 0: .18, 1: .64, 2: .18, 3: 0 };
+
+  return {
+    equipo: {
+      choice: Object.keys(probs).reduce((a, b) => probs[a] > probs[b] ? a : b),
+      probabilities: probs, confidence: confianza(probs)
+    },
+    urgencia: {
+      score: Object.values(pUrg).reduce((s, p, i) => s + i * p, 0),
+      probabilities: pUrg, confidence: confianza(pUrg),
+      legend: Object.fromEntries(NIVELES.map((n, i) => [i, n]))
+    },
+    pide_reembolso: { noul: tiene("devu", "reembols", "reversar") ? .93 : .04 }
+  };
+}
+
+function decidir(r) {
+  const conf = r.equipo.confidence;
+  // Tramo 1 — el modelo duda: no adivinamos.
+  if (conf < ESCALAR) return `revisión humana — confianza ${conf.toFixed(2)} < ${ESCALAR}`;
+  // Tramo 2 — toca dinero: alto riesgo, exige más confianza.
+  if (r.pide_reembolso.noul >= ES_REEMBOLSO)
+    return conf >= RIESGO_ALTO
+      ? "cola de reembolsos — automático"
+      : "cola de reembolsos — pide confirmación a un agente";
+  // Tramo 3 — solo enruta: bajo riesgo.
+  if (r.urgencia.score >= 2.5) return r.equipo.choice + " — atención inmediata";
+  return r.equipo.choice + " — cola normal";
+}
+
+function barras(probs, ganador) {
+  return Object.entries(probs).sort((a, b) => b[1] - a[1]).map(([k, v]) =>
+    `<div class="bar ${k === ganador ? "win" : ""}">
+       <span>${k}</span><i><b style="width:${(v * 100).toFixed(0)}%"></b></i><em>${v.toFixed(2)}</em>
+     </div>`).join("");
+}
+
+function correr() {
+  const r = simular(document.getElementById("ticket").value);
+  const nivel = r.urgencia.legend[Math.round(r.urgencia.score)];
+  document.getElementById("out").innerHTML = `
+    <div class="ans">
+      <div class="ans-h"><b>equipo</b> <span>choice · <em>${r.equipo.choice}</em> · conf ${r.equipo.confidence.toFixed(2)}</span></div>
+      <div class="bars">${barras(r.equipo.probabilities, r.equipo.choice)}</div>
+    </div>
+    <div class="ans">
+      <div class="ans-h"><b>urgencia</b> <span>score · <em>${r.urgencia.score.toFixed(2)}</em> · ${nivel}</span></div>
+      <div class="bars">${barras(
+        Object.fromEntries(Object.entries(r.urgencia.probabilities).map(([i, v]) => [r.urgencia.legend[i], v])),
+        nivel)}</div>
+    </div>
+    <div class="ans">
+      <div class="ans-h"><b>pide_reembolso</b> <span>noul · <em>${r.pide_reembolso.noul.toFixed(2)}</em> de probabilidad</span></div>
+    </div>
+    <div class="verdict">
+      <b>Lo que decide tu código</b>
+      ${decidir(r)}
+      <div style="font-size:12.5px;color:#BBB;margin-top:6px">tramos · &lt;${ESCALAR} humano · ${ESCALAR}–${RIESGO_ALTO} confirmar · &gt;${RIESGO_ALTO} automático</div>
+    </div>`;
+}
+
+document.getElementById("go").addEventListener("click", correr);
+document.querySelectorAll(".chips button").forEach(b =>
+  b.addEventListener("click", () => { document.getElementById("ticket").value = b.dataset.t; correr(); }));
+correr();
+</script>
